@@ -98,6 +98,7 @@ const csvData = `
     Z971;K-space;Class 1 W-Space;100,000;62,000;0;1;16
 `;
 
+
 function parseCSV(csv) {
     const lines = csv.trim().split('\n');
     const headers = lines[0].split(';');
@@ -111,10 +112,42 @@ function parseCSV(csv) {
 }
 
 const wormholeData = parseCSV(csvData);
+
+// Populate the datalist on page load
+document.addEventListener('DOMContentLoaded', function () {
+    const datalist = document.getElementById('wormholeTypes');
+    const wormholeTypes = [...new Set(wormholeData.map(item => item["Wormhole Type"]))];
+
+    wormholeTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        datalist.appendChild(option);
+    });
+
+    // Add event listeners for Enter key
+    document.getElementById('wormholeName').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            parseDescription();
+        }
+    });
+
+    document.getElementById('description').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            // Prevent newline in textarea when pressing Enter
+            e.preventDefault();
+            parseDescription();
+        }
+    });
+});
+
 // Function to parse the description and match it with the CSV
 function parseDescription() {
     const description = document.getElementById('description').value.toLowerCase();
-    const wormholeName = document.getElementById('wormholeName').value.toLowerCase();
+    let wormholeName = document.getElementById('wormholeName').value.toLowerCase();
+
+    // Remove "wormhole" prefix if present
+    wormholeName = wormholeName.replace(/^wormhole\s*/i, '').trim();
+
     const result = {};
 
     // System type mapping
@@ -166,7 +199,7 @@ function parseDescription() {
             break;
         }
     }
-    
+
     const massStatus = {
         "not yet": { text: "Over 50%", number: 50 },
         "not to a critical degree": { text: "Between 50% and 10%", numbers: [50, 10] },
@@ -198,14 +231,15 @@ function parseDescription() {
     }
 
     function parseMassValue(massString) {
-        // Remove any commas and "t" (or other non-numeric characters)
         return parseFloat(massString.replace(/[,t\s]/g, ""));
     }
 
-
-
     // Extract CSV details
-    const wh = wormholeData.find(row => row["Wormhole Type"]?.toLowerCase() === wormholeName);
+    const wh = wormholeData.find(row => {
+        const csvType = row["Wormhole Type"]?.replace(/^wormhole\s*/i, '').trim();
+        return csvType?.toLowerCase() === wormholeName.toLowerCase();
+    });
+
     if (wh) {
         result['Wormhole Type'] = wh["Wormhole Type"];
         result['Goes From'] = wh["Goes from"];
@@ -215,11 +249,14 @@ function parseDescription() {
         result['Mass Regeneration'] = wh["Mass Regeneration (t/day)"];
         result['Wormhole Classification'] = wh["Wormhole Classification"];
         result['Max Stable Time'] = wh["Max Stable Time (Hours)"];
-        // Calculate the probable mass
+
         if (result['Mass Number']) {
             const probableMass = result['Mass Number'](wh);
-            result['Probable Mass'] = formatNumber(probableMass);
+            result['Probable Mass'] = probableMass;
         }
+
+        // Add Roll it! button that opens the roller page with mass parameter
+        result['RollButton'] = `<button onclick="window.location.href='roller.html?mass=${wh['Total Mass Allowed (t)'].replace(/,/g, '')}'">Roll it!</button>`;
     }
 
     // Display results
@@ -227,23 +264,16 @@ function parseDescription() {
     resultDiv.innerHTML = `
         <div><label>System Type:</label> <span>${result['System Type'] || 'Unknown'}</span></div>
         <div><label>Wormhole Classification:</label> <span>${result['Wormhole Classification'] || 'Unknown'}</span></div>
-        </br>
         <div><label>Life:</label> <span>${result['Life'] || 'Unknown'}</span></div>
-        <div><label>Max Stable Time:</label> <span>${result['Max Stable Time']+' hours' || 'Unknown'}</span></div>
-        </br>
+        <div><label>Max Stable Time:</label> <span>${result['Max Stable Time'] + ' hours' || 'Unknown'}</span></div>
         <div><label>Goes From:</label> <span>${result['Goes From'] || 'Unknown'}</span></div>
         <div><label>Leads To:</label> <span>${result['Leads To'] || 'Unknown'}</span></div>
-        </br>
         <div><label>Ship Size:</label> <span>${result['Ship Size'] || 'Unknown'}</span></div>
         <div><label>Max Individual Mass (t):</label> <span>${result['Max Individual Mass'] || 'Unknown'}</span></div>
         <div><label>Total Mass Allowed (t):</label> <span>${result['Total Mass Allowed'] || 'Unknown'}</span></div>
-        <div><label>Mass Status:</label> <span>${result['Mass'] || 'Unknown'}</span></div>  <!-- Mass status -->
-        <div><label>Probable Mass:</label> <span>${result['Probable Mass'] || 'Unknown'}</span></div> <!-- Probable mass -->
+        <div><label>Mass Status:</label> <span>${result['Mass'] || 'Unknown'}</span></div>
+        <div><label>Probable Mass:</label> <span>${result['Probable Mass'] || 'Unknown'}</span></div>
         <div><label>Mass Regeneration (t/day):</label> <span>${result['Mass Regeneration'] || 'Unknown'}</span></div>
+        ${result['RollButton'] || ''}
     `;
-}
-
-// Helper function to format number with commas
-function formatNumber(number) {
-    return number.toLocaleString();
 }

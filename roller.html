@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wormhole Rolling Tracker</title>
+    <link rel="stylesheet" href="src/roller_styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div id="log">
+            <h3>Roll Log</h3>
+            <div id="logList"></div>
+        </div>
+        <div class="main-content">
+            <h1>Wormhole Rolling Tracker</h1>
+
+            <div>
+                <label>Estimated Initial Mass:</label>
+                <input type="number" id="whMass" value="2000000">
+                <button onclick="addShip()">Add Ship</button>
+                <button onclick="softReset()">Reset</button>
+            </div>
+
+            <div id="ships"></div>
+
+            <h3>Estimated Rolls to Collapse:</h3>
+            <div class="bar-wrapper">
+                <div class="bar-container">
+                    <div id="segments"></div>
+                    <div id="stageMarkerContainer"></div>
+                </div>
+                <div class="marker-labels">
+                    <span class="marker-label">100%</span>
+                    <span class="marker-label">50%</span>
+                    <span class="marker-label">10%</span>
+                </div>
+            </div>
+
+            <button id="stage2Button" onclick="activateStage2()">Stage 2 Reached</button>
+            <button id="stage3Button" onclick="activateStage3()">Stage 3 Reached</button>
+
+            <p>Remaining Mass: <span id="remainingMass">2000000</span> | Total Rolled: <span id="totalMass">0</span></p>
+
+            <div id="finalMessage"></div>
+        </div>
+    </div>
+
+    <script src="src/roller_scripts.js"></script>
+</body>
+
+</html>

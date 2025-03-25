@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wormhole Parser</title>
     <link rel="stylesheet" href="src/styles.css">
 </head>
+
 <body>
     <h1>Wormhole Parser</h1>
     <p>Enter the wormhole infos:</p>
 
-    <input type="text" id="wormholeName" placeholder="Enter Wormhole Type (Ex: K162)" />
+    <input list="wormholeTypes" id="wormholeName" placeholder="Enter Wormhole Type (Ex: K162)" />
+    <datalist id="wormholeTypes">
+
+    </datalist>
     <textarea id="description" placeholder="Paste the wormhole description here..."></textarea>
     <button onclick="parseDescription()">Parse Description</button>
 
@@ -18,4 +23,5 @@
 
     <script src="src/scripts.js"></script>
 </body>
+
 </html>
